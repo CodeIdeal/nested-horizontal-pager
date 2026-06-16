@@ -43,7 +43,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.codeideal",
         artifactId = "nested-horizontal-pager",
-        version = "1.0.0"
+        version = "1.0.1"
     )
     pom {
         name.set("Nested Horizontal Pager")
