@@ -92,11 +92,23 @@ fun rememberNestedHorizontalPagerConnection(
 
 ## Gradle
 
-当前仓库把库作为本地 module 引用：
+库已经发布到 Maven Central。先确保你的项目启用了 `mavenCentral()`：
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+```
+
+然后添加依赖：
 
 ```kotlin
 dependencies {
-    implementation(project(":nested-horizontal-pager"))
+    implementation("io.github.codeideal:nested-horizontal-pager:1.0.1")
 }
 ```
 

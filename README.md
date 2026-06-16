@@ -92,11 +92,23 @@ Use `rememberNestedHorizontalPagerConnection(parentState, childState)` for one a
 
 ## Gradle
 
-This repository includes the library as a local module:
+The library is published on Maven Central. Make sure your project uses `mavenCentral()`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+```
+
+Then add the dependency:
 
 ```kotlin
 dependencies {
-    implementation(project(":nested-horizontal-pager"))
+    implementation("io.github.codeideal:nested-horizontal-pager:1.0.1")
 }
 ```
 
