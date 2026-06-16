@@ -240,6 +240,7 @@ private fun TwoLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modif
             state = outerPagerState,
             modifier = Modifier.fillMaxSize()
                 .nestedScroll(rootConnection),
+            pageNestedScrollConnection = NoOpNestedScrollConnection
         ) { outerPage ->
             val innerPagerState = rememberPagerState(pageCount = { twoLevelInnerTabs.size })
             val outerInnerConnection = rememberNestedHorizontalPagerConnection(
@@ -293,6 +294,7 @@ private fun ThreeLevelNestedPagerDemo(parentPageState: PagerState, modifier: Mod
             state = outerPagerState,
             modifier = Modifier.fillMaxSize()
                 .nestedScroll(rootConnection),
+            pageNestedScrollConnection = NoOpNestedScrollConnection
         ) { outerPage ->
             val middlePagerState = rememberPagerState(pageCount = { threeLevelMiddleTabs.size })
             val outerMiddleConnection = rememberNestedHorizontalPagerConnection(
