@@ -9,10 +9,14 @@ It fixes the common case where an inner `HorizontalPager` reaches its first or l
 ## Screen Recordings
 ### Before fix
 The parent pager can lag at the child boundary and may stop between pages.  
-https://github.com/user-attachments/assets/595b0ea5-24e1-4284-b2b9-2fd58e32191c
+
+https://github.com/user-attachments/assets/6943f839-aa6a-44d8-aaca-3f86e9c5512b
+
 ### After fix
 Boundary drag and fling hand off to the parent pager more consistently.  
-https://github.com/user-attachments/assets/16c59db0-1082-4e6c-bcc2-1b7a93897d8c
+
+https://github.com/user-attachments/assets/2f0393de-bd42-4590-8d78-15283e9d7878
+
 
 ## Problem
 

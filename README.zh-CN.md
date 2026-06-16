@@ -9,11 +9,13 @@
 ## 录屏示例
 ### 修复前
 内层边界外拖时，父层可能不跟手，并可能停在两个 Page 中间。  
-https://github.com/user-attachments/assets/595b0ea5-24e1-4284-b2b9-2fd58e32191c
+
+https://github.com/user-attachments/assets/6943f839-aa6a-44d8-aaca-3f86e9c5512b
+
 ### 修复后
 边界拖拽和 fling 能更稳定地交接给父层 Pager。  
-https://github.com/user-attachments/assets/16c59db0-1082-4e6c-bcc2-1b7a93897d8c
-                                               |
+
+https://github.com/user-attachments/assets/2f0393de-bd42-4590-8d78-15283e9d7878
 
 ## 问题
 
