@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
@@ -20,7 +21,11 @@ import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +45,12 @@ private val threeLevelOuterTabs = listOf("Outer A", "Outer B")
 private val threeLevelMiddleTabs = listOf("Middle 1", "Middle 2", "Middle 3")
 private val threeLevelInnerTabs = listOf("Inner 1", "Inner 2", "Inner 3", "Inner 4")
 
+private enum class AppPage {
+    Menu,
+    BeforeFix,
+    Fixed
+}
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +58,131 @@ class MainActivity : ComponentActivity() {
         setContent {
             DemoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NestedPagerDemo(modifier = Modifier.padding(innerPadding))
+                    DemoApp(modifier = Modifier.padding(innerPadding))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DemoApp(modifier: Modifier = Modifier) {
+    var currentPage by remember { mutableStateOf(AppPage.Menu) }
+
+    when (currentPage) {
+        AppPage.Menu -> DemoMenu(
+            modifier = modifier,
+            onBeforeFixClick = { currentPage = AppPage.BeforeFix },
+            onFixedClick = { currentPage = AppPage.Fixed }
+        )
+
+        AppPage.BeforeFix -> DemoPageContainer(
+            title = "Before fix",
+            modifier = modifier,
+            onBackClick = { currentPage = AppPage.Menu }
+        ) {
+            BeforeFixNestedPagerDemo()
+        }
+
+        AppPage.Fixed -> DemoPageContainer(
+            title = "Fixed",
+            modifier = modifier,
+            onBackClick = { currentPage = AppPage.Menu }
+        ) {
+            NestedPagerDemo()
+        }
+    }
+}
+
+@Composable
+private fun DemoMenu(
+    onBeforeFixClick: () -> Unit,
+    onFixedClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Nested HorizontalPager",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Button(onClick = onBeforeFixClick) {
+            Text("Before fix")
+        }
+        Button(onClick = onFixedClick) {
+            Text("Fixed demo")
+        }
+    }
+}
+
+@Composable
+private fun DemoPageContainer(
+    title: String,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        Button(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            onClick = onBackClick
+        ) {
+            Text("Back")
+        }
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold
+        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun BeforeFixNestedPagerDemo(modifier: Modifier = Modifier) {
+    val outerPagerState = rememberPagerState(pageCount = { twoLevelOuterTabs.size })
+
+    Column(modifier = modifier.fillMaxSize()) {
+        PagerTabs(
+            titles = twoLevelOuterTabs,
+            pagerState = outerPagerState,
+            level = TabLevel.Primary
+        )
+
+        HorizontalPager(
+            state = outerPagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { outerPage ->
+            val innerPagerState = rememberPagerState(pageCount = { twoLevelInnerTabs.size })
+
+            Column(Modifier.fillMaxSize()) {
+                PagerTabs(
+                    titles = twoLevelInnerTabs,
+                    pagerState = innerPagerState,
+                    level = TabLevel.Secondary
+                )
+
+                HorizontalPager(
+                    state = innerPagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPage ->
+                    DemoContentPage(
+                        title = "Before fix",
+                        labels = listOf(
+                            "Outer: ${twoLevelOuterTabs[outerPage]}",
+                            "Inner: ${twoLevelInnerTabs[innerPage]}"
+                        ),
+                        color = demoColor(outerPage, innerPage)
+                    )
                 }
             }
         }
@@ -88,7 +223,7 @@ fun NestedPagerDemo(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TwoLevelNestedPagerDemo(parentPageState:PagerState, modifier: Modifier = Modifier) {
+private fun TwoLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modifier = Modifier) {
     val outerPagerState = rememberPagerState(pageCount = { twoLevelOuterTabs.size })
     val rootConnection = rememberNestedHorizontalPagerConnection(
         parentState = parentPageState,
@@ -126,7 +261,7 @@ private fun TwoLevelNestedPagerDemo(parentPageState:PagerState, modifier: Modifi
                         .nestedScroll(outerInnerConnection),
                     pageNestedScrollConnection = NoOpNestedScrollConnection
                 ) { innerPage ->
-                    DemoPage(
+                    DemoContentPage(
                         title = "Two levels",
                         labels = listOf(
                             "Outer: ${twoLevelOuterTabs[outerPage]}",
@@ -141,7 +276,7 @@ private fun TwoLevelNestedPagerDemo(parentPageState:PagerState, modifier: Modifi
 }
 
 @Composable
-private fun ThreeLevelNestedPagerDemo(parentPageState:PagerState, modifier: Modifier = Modifier) {
+private fun ThreeLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modifier = Modifier) {
     val outerPagerState = rememberPagerState(pageCount = { threeLevelOuterTabs.size })
     val rootConnection = rememberNestedHorizontalPagerConnection(
         parentState = parentPageState,
@@ -199,7 +334,7 @@ private fun ThreeLevelNestedPagerDemo(parentPageState:PagerState, modifier: Modi
                                 .nestedScroll(middleInnerConnection),
                             pageNestedScrollConnection = NoOpNestedScrollConnection
                         ) { innerPage ->
-                            DemoPage(
+                            DemoContentPage(
                                 title = "Three levels",
                                 labels = listOf(
                                     "Outer: ${threeLevelOuterTabs[outerPage]}",
@@ -255,7 +390,7 @@ private fun PagerTabs(
 }
 
 @Composable
-private fun DemoPage(
+private fun DemoContentPage(
     title: String,
     labels: List<String>,
     color: Color
@@ -299,6 +434,6 @@ private enum class TabLevel {
 @Composable
 fun NestedPagerDemoPreview() {
     DemoTheme {
-        NestedPagerDemo()
+        DemoApp()
     }
 }
