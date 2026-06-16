@@ -6,6 +6,13 @@
 
 它解决的问题是：内层 `HorizontalPager` 滑到第一页或最后一页后，继续向边界外拖动时，外层 `HorizontalPager` 应该接手切页，但实际表现可能是不跟手、fling 不容易触发，甚至频繁在边界左右滑动时卡在两个外层 Page 中间。
 
+## 录屏示例
+
+| 修复前 | 修复后                                                                             |
+| --- |---------------------------------------------------------------------------------|
+| https://github.com/user-attachments/assets/595b0ea5-24e1-4284-b2b9-2fd58e32191c | https://github.com/user-attachments/assets/16c59db0-1082-4e6c-bcc2-1b7a93897d8c |
+| 内层边界外拖时，父层可能不跟手，并可能停在两个 Page 中间。 | 边界拖拽和 fling 能更稳定地交接给父层 Pager。                                                   |
+
 ## 问题
 
 单一 `HorizontalPager` 的手势链路很干净：
@@ -147,11 +154,6 @@ HorizontalPager(
 ```
 
 ## 示例
-
-录屏示例：
-
-- [修复前](before_fix.mp4)：内层边界外拖时，父层可能不跟手，并可能停在两个 Page 中间。
-- [修复后](after_fix.mp4)：边界拖拽和 fling 能更稳定地交接给父层 Pager。
 
 构建示例 app：
 
