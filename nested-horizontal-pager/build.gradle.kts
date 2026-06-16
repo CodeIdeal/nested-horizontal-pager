@@ -34,9 +34,6 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
 }
 
-group = "io.github.codeideal"
-version = "1.0.0"
-
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
