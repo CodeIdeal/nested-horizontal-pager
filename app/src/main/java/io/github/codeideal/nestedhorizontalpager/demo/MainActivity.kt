@@ -4,12 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -29,13 +32,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.codeideal.nestedhorizontalpager.NoOpNestedScrollConnection
+import io.github.codeideal.nestedhorizontalpager.NestedHorizontalPager
+import io.github.codeideal.nestedhorizontalpager.NestedHorizontalPagerContent
 import io.github.codeideal.nestedhorizontalpager.demo.ui.theme.DemoTheme
-import io.github.codeideal.nestedhorizontalpager.rememberNestedHorizontalPagerConnection
 import kotlinx.coroutines.launch
 
 private val demoTabs = listOf("Two levels", "Three levels")
@@ -181,7 +184,8 @@ private fun BeforeFixNestedPagerDemo(modifier: Modifier = Modifier) {
                             "Outer: ${twoLevelOuterTabs[outerPage]}",
                             "Inner: ${twoLevelInnerTabs[innerPage]}"
                         ),
-                        color = demoColor(outerPage, innerPage)
+                        color = demoColor(outerPage, innerPage),
+                        innerPagerState = innerPagerState
                     )
                 }
             }
@@ -209,10 +213,9 @@ fun NestedPagerDemo(modifier: Modifier = Modifier) {
             }
         }
 
-        HorizontalPager(
+        NestedHorizontalPager(
             state = demoPagerState,
-            modifier = Modifier.fillMaxSize(),
-            pageNestedScrollConnection = NoOpNestedScrollConnection
+            modifier = Modifier.fillMaxSize()
         ) { page ->
             when (page) {
                 0 -> TwoLevelNestedPagerDemo(demoPagerState)
@@ -225,10 +228,7 @@ fun NestedPagerDemo(modifier: Modifier = Modifier) {
 @Composable
 private fun TwoLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modifier = Modifier) {
     val outerPagerState = rememberPagerState(pageCount = { twoLevelOuterTabs.size })
-    val rootConnection = rememberNestedHorizontalPagerConnection(
-        parentState = parentPageState,
-        childState = outerPagerState
-    )
+
     Column(modifier = modifier.fillMaxSize()) {
         PagerTabs(
             titles = twoLevelOuterTabs,
@@ -236,17 +236,12 @@ private fun TwoLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modif
             level = TabLevel.Primary
         )
 
-        HorizontalPager(
+        NestedHorizontalPager(
             state = outerPagerState,
+            parentState = parentPageState,
             modifier = Modifier.fillMaxSize()
-                .nestedScroll(rootConnection),
-            pageNestedScrollConnection = NoOpNestedScrollConnection
         ) { outerPage ->
             val innerPagerState = rememberPagerState(pageCount = { twoLevelInnerTabs.size })
-            val outerInnerConnection = rememberNestedHorizontalPagerConnection(
-                parentState = outerPagerState,
-                childState = innerPagerState
-            )
 
             Column(Modifier.fillMaxSize()) {
                 PagerTabs(
@@ -255,12 +250,10 @@ private fun TwoLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modif
                     level = TabLevel.Secondary
                 )
 
-                HorizontalPager(
+                NestedHorizontalPager(
                     state = innerPagerState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .nestedScroll(outerInnerConnection),
-                    pageNestedScrollConnection = NoOpNestedScrollConnection
+                    parentState = outerPagerState,
+                    modifier = Modifier.fillMaxSize()
                 ) { innerPage ->
                     DemoContentPage(
                         title = "Two levels",
@@ -268,7 +261,8 @@ private fun TwoLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modif
                             "Outer: ${twoLevelOuterTabs[outerPage]}",
                             "Inner: ${twoLevelInnerTabs[innerPage]}"
                         ),
-                        color = demoColor(outerPage, innerPage)
+                        color = demoColor(outerPage, innerPage),
+                        innerPagerState = innerPagerState
                     )
                 }
             }
@@ -279,10 +273,7 @@ private fun TwoLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modif
 @Composable
 private fun ThreeLevelNestedPagerDemo(parentPageState: PagerState, modifier: Modifier = Modifier) {
     val outerPagerState = rememberPagerState(pageCount = { threeLevelOuterTabs.size })
-    val rootConnection = rememberNestedHorizontalPagerConnection(
-        parentState = parentPageState,
-        childState = outerPagerState
-    )
+
     Column(modifier = modifier.fillMaxSize()) {
         PagerTabs(
             titles = threeLevelOuterTabs,
@@ -290,17 +281,12 @@ private fun ThreeLevelNestedPagerDemo(parentPageState: PagerState, modifier: Mod
             level = TabLevel.Primary
         )
 
-        HorizontalPager(
+        NestedHorizontalPager(
             state = outerPagerState,
+            parentState = parentPageState,
             modifier = Modifier.fillMaxSize()
-                .nestedScroll(rootConnection),
-            pageNestedScrollConnection = NoOpNestedScrollConnection
         ) { outerPage ->
             val middlePagerState = rememberPagerState(pageCount = { threeLevelMiddleTabs.size })
-            val outerMiddleConnection = rememberNestedHorizontalPagerConnection(
-                parentState = outerPagerState,
-                childState = middlePagerState
-            )
 
             Column(modifier = Modifier.fillMaxSize()) {
                 PagerTabs(
@@ -309,18 +295,12 @@ private fun ThreeLevelNestedPagerDemo(parentPageState: PagerState, modifier: Mod
                     level = TabLevel.Secondary
                 )
 
-                HorizontalPager(
+                NestedHorizontalPager(
                     state = middlePagerState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .nestedScroll(outerMiddleConnection),
-                    pageNestedScrollConnection = NoOpNestedScrollConnection
+                    parentState = outerPagerState,
+                    modifier = Modifier.fillMaxSize()
                 ) { middlePage ->
                     val innerPagerState = rememberPagerState(pageCount = { threeLevelInnerTabs.size })
-                    val middleInnerConnection = rememberNestedHorizontalPagerConnection(
-                        parentState = middlePagerState,
-                        childState = innerPagerState
-                    )
 
                     Column(Modifier.fillMaxSize()) {
                         PagerTabs(
@@ -329,12 +309,10 @@ private fun ThreeLevelNestedPagerDemo(parentPageState: PagerState, modifier: Mod
                             level = TabLevel.Secondary
                         )
 
-                        HorizontalPager(
+                        NestedHorizontalPager(
                             state = innerPagerState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .nestedScroll(middleInnerConnection),
-                            pageNestedScrollConnection = NoOpNestedScrollConnection
+                            parentState = middlePagerState,
+                            modifier = Modifier.fillMaxSize()
                         ) { innerPage ->
                             DemoContentPage(
                                 title = "Three levels",
@@ -343,7 +321,8 @@ private fun ThreeLevelNestedPagerDemo(parentPageState: PagerState, modifier: Mod
                                     "Middle: ${threeLevelMiddleTabs[middlePage]}",
                                     "Inner: ${threeLevelInnerTabs[innerPage]}"
                                 ),
-                                color = demoColor(outerPage, middlePage, innerPage)
+                                color = demoColor(outerPage, middlePage, innerPage),
+                                innerPagerState = innerPagerState
                             )
                         }
                     }
@@ -395,9 +374,11 @@ private fun PagerTabs(
 private fun DemoContentPage(
     title: String,
     labels: List<String>,
-    color: Color
+    color: Color,
+    innerPagerState: PagerState
 ) {
-    Box(
+    NestedHorizontalPagerContent(
+        state = innerPagerState,
         modifier = Modifier
             .fillMaxSize()
             .background(color),
@@ -407,6 +388,20 @@ private fun DemoContentPage(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            LazyRow {
+                repeat(12) {
+                    item {
+                        Image(
+                            painter = painterResource(android.R.drawable.ic_dialog_dialer),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .background(Color.Gray)
+                                .padding(8.dp)
+                                .size(60.dp)
+                        )
+                    }
+                }
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,

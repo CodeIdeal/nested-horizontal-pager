@@ -77,6 +77,28 @@ nested-horizontal-pager/
 ## API
 
 ```kotlin
+@Composable
+fun NestedHorizontalPager(
+    state: PagerState,
+    parentState: PagerState? = null,
+    ...
+)
+
+@Composable
+fun NestedHorizontalPagerContent(
+    state: PagerState,
+    enabled: Boolean = true,
+    ...
+)
+```
+
+Use `NestedHorizontalPager` instead of `HorizontalPager` for pagers that participate in same-direction nesting. Pass `parentState` only when the pager has a direct parent pager; root pagers can omit it.
+
+Use `NestedHorizontalPagerContent` around leaf page content when that content contains its own horizontal scrollables, such as `LazyRow`. This isolates leftover content fling velocity so it does not bubble into the outer pager hand-off connection.
+
+Advanced APIs are still available if you need manual wiring:
+
+```kotlin
 object NoOpNestedScrollConnection : NestedScrollConnection
 
 @Composable
@@ -85,10 +107,6 @@ fun rememberNestedHorizontalPagerConnection(
     childState: PagerState
 ): NestedScrollConnection
 ```
-
-Use `NoOpNestedScrollConnection` to disable the default `HorizontalPager` `pageNestedScrollConnection` on pagers that participate in the hand-off.
-
-Use `rememberNestedHorizontalPagerConnection(parentState, childState)` for one adjacent parent-child pager pair. Do not reuse the same connection across multiple pairs because it stores per-gesture state.
 
 ## Gradle
 
@@ -108,7 +126,7 @@ Then add the dependency:
 
 ```kotlin
 dependencies {
-    implementation("io.github.codeideal:nested-horizontal-pager:1.0.1")
+    implementation("io.github.codeideal:nested-horizontal-pager:1.1.0")
 }
 ```
 
@@ -117,22 +135,18 @@ dependencies {
 ```kotlin
 val outerPagerState = rememberPagerState(pageCount = { outerTabs.size })
 
-HorizontalPager(
-    state = outerPagerState,
-    pageNestedScrollConnection = NoOpNestedScrollConnection
+NestedHorizontalPager(
+    state = outerPagerState
 ) { outerPage ->
     val innerPagerState = rememberPagerState(pageCount = { innerTabs.size })
-    val connection = rememberNestedHorizontalPagerConnection(
-        parentState = outerPagerState,
-        childState = innerPagerState
-    )
 
-    HorizontalPager(
+    NestedHorizontalPager(
         state = innerPagerState,
-        modifier = Modifier.nestedScroll(connection),
-        pageNestedScrollConnection = NoOpNestedScrollConnection
+        parentState = outerPagerState
     ) { innerPage ->
-        // page content
+        NestedHorizontalPagerContent(state = innerPagerState) {
+            // leaf page content, including LazyRow or other horizontal scrollers
+        }
     }
 }
 ```
@@ -140,31 +154,17 @@ HorizontalPager(
 ## Three-Level Usage
 
 ```kotlin
-val outerMiddleConnection = rememberNestedHorizontalPagerConnection(
-    parentState = outerPagerState,
-    childState = middlePagerState
-)
-
-val middleInnerConnection = rememberNestedHorizontalPagerConnection(
-    parentState = middlePagerState,
-    childState = innerPagerState
-)
-```
-
-Attach each connection to its direct child pager:
-
-```kotlin
-HorizontalPager(
+NestedHorizontalPager(
     state = middlePagerState,
-    modifier = Modifier.nestedScroll(outerMiddleConnection),
-    pageNestedScrollConnection = NoOpNestedScrollConnection
+    parentState = outerPagerState
 ) {
-    HorizontalPager(
+    NestedHorizontalPager(
         state = innerPagerState,
-        modifier = Modifier.nestedScroll(middleInnerConnection),
-        pageNestedScrollConnection = NoOpNestedScrollConnection
+        parentState = middlePagerState
     ) {
-        // page content
+        NestedHorizontalPagerContent(state = innerPagerState) {
+            // leaf page content
+        }
     }
 }
 ```

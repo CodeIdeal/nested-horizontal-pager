@@ -77,6 +77,28 @@ nested-horizontal-pager/
 ## API
 
 ```kotlin
+@Composable
+fun NestedHorizontalPager(
+    state: PagerState,
+    parentState: PagerState? = null,
+    ...
+)
+
+@Composable
+fun NestedHorizontalPagerContent(
+    state: PagerState,
+    enabled: Boolean = true,
+    ...
+)
+```
+
+参与同方向嵌套的 Pager 使用 `NestedHorizontalPager` 替代 `HorizontalPager`。只有当前 Pager 有直接父 Pager 时才需要传 `parentState`；根层 Pager 可以不传。
+
+当页面内容内部还有横向滚动组件，例如 `LazyRow`，用 `NestedHorizontalPagerContent` 包住叶子页面内容。它会隔离内容内部剩余的横向 fling velocity，避免继续冒泡到外层 Pager 的手势交接 connection。
+
+如果需要手动接线，也可以继续使用底层 API：
+
+```kotlin
 object NoOpNestedScrollConnection : NestedScrollConnection
 
 @Composable
@@ -85,10 +107,6 @@ fun rememberNestedHorizontalPagerConnection(
     childState: PagerState
 ): NestedScrollConnection
 ```
-
-`NoOpNestedScrollConnection` 用来关闭参与交接的 `HorizontalPager` 默认 `pageNestedScrollConnection`。
-
-`rememberNestedHorizontalPagerConnection(parentState, childState)` 用于一对相邻父子 Pager。不要把同一个 connection 复用到多对 Pager，因为它内部保存了一次手势中的状态。
 
 ## Gradle
 
@@ -108,7 +126,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("io.github.codeideal:nested-horizontal-pager:1.0.1")
+    implementation("io.github.codeideal:nested-horizontal-pager:1.1.0")
 }
 ```
 
@@ -117,22 +135,18 @@ dependencies {
 ```kotlin
 val outerPagerState = rememberPagerState(pageCount = { outerTabs.size })
 
-HorizontalPager(
-    state = outerPagerState,
-    pageNestedScrollConnection = NoOpNestedScrollConnection
+NestedHorizontalPager(
+    state = outerPagerState
 ) { outerPage ->
     val innerPagerState = rememberPagerState(pageCount = { innerTabs.size })
-    val connection = rememberNestedHorizontalPagerConnection(
-        parentState = outerPagerState,
-        childState = innerPagerState
-    )
 
-    HorizontalPager(
+    NestedHorizontalPager(
         state = innerPagerState,
-        modifier = Modifier.nestedScroll(connection),
-        pageNestedScrollConnection = NoOpNestedScrollConnection
+        parentState = outerPagerState
     ) { innerPage ->
-        // page content
+        NestedHorizontalPagerContent(state = innerPagerState) {
+            // 叶子页面内容，可以包含 LazyRow 或其他横向滚动组件
+        }
     }
 }
 ```
@@ -140,31 +154,17 @@ HorizontalPager(
 ## 三层嵌套用法
 
 ```kotlin
-val outerMiddleConnection = rememberNestedHorizontalPagerConnection(
-    parentState = outerPagerState,
-    childState = middlePagerState
-)
-
-val middleInnerConnection = rememberNestedHorizontalPagerConnection(
-    parentState = middlePagerState,
-    childState = innerPagerState
-)
-```
-
-每个 connection 挂到它的直接子 Pager 上：
-
-```kotlin
-HorizontalPager(
+NestedHorizontalPager(
     state = middlePagerState,
-    modifier = Modifier.nestedScroll(outerMiddleConnection),
-    pageNestedScrollConnection = NoOpNestedScrollConnection
+    parentState = outerPagerState
 ) {
-    HorizontalPager(
+    NestedHorizontalPager(
         state = innerPagerState,
-        modifier = Modifier.nestedScroll(middleInnerConnection),
-        pageNestedScrollConnection = NoOpNestedScrollConnection
+        parentState = middlePagerState
     ) {
-        // page content
+        NestedHorizontalPagerContent(state = innerPagerState) {
+            // 叶子页面内容
+        }
     }
 }
 ```

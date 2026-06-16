@@ -1,13 +1,30 @@
 package io.github.codeideal.nestedhorizontalpager
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.TargetedFlingBehavior
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.OverscrollEffect
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.dp
 import kotlin.math.absoluteValue
 
 /**
@@ -19,6 +36,103 @@ import kotlin.math.absoluteValue
  * move the parent pager.
  */
 object NoOpNestedScrollConnection : NestedScrollConnection
+
+/**
+ * A [HorizontalPager] wrapper for same-direction nested horizontal pagers.
+ *
+ * The wrapper always disables the Pager's default `pageNestedScrollConnection`. When [parentState]
+ * is provided, it also installs the hand-off connection that moves the direct parent pager once this
+ * pager reaches a horizontal boundary.
+ *
+ * Use [NestedHorizontalPagerContent] inside a page when the page content contains its own
+ * same-direction horizontal scrollables, such as `LazyRow`.
+ */
+@Composable
+fun NestedHorizontalPager(
+    state: PagerState,
+    parentState: PagerState? = null,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    pageSize: PageSize = PageSize.Fill,
+    beyondViewportPageCount: Int = PagerDefaults.BeyondViewportPageCount,
+    pageSpacing: Dp = 0.dp,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    flingBehavior: TargetedFlingBehavior = PagerDefaults.flingBehavior(state = state),
+    userScrollEnabled: Boolean = true,
+    reverseLayout: Boolean = false,
+    key: ((index: Int) -> Any)? = null,
+    snapPosition: SnapPosition = SnapPosition.Start,
+    overscrollEffect: OverscrollEffect? = rememberOverscrollEffect(),
+    pageContent: @Composable PagerScope.(page: Int) -> Unit
+) {
+    val pagerModifier = if (parentState == null) {
+        modifier
+    } else {
+        modifier.nestedScroll(
+            rememberNestedHorizontalPagerConnection(
+                parentState = parentState,
+                childState = state
+            )
+        )
+    }
+
+    HorizontalPager(
+        state = state,
+        modifier = pagerModifier,
+        contentPadding = contentPadding,
+        pageSize = pageSize,
+        beyondViewportPageCount = beyondViewportPageCount,
+        pageSpacing = pageSpacing,
+        verticalAlignment = verticalAlignment,
+        flingBehavior = flingBehavior,
+        userScrollEnabled = userScrollEnabled,
+        reverseLayout = reverseLayout,
+        key = key,
+        snapPosition = snapPosition,
+        overscrollEffect = overscrollEffect,
+        pageNestedScrollConnection = NoOpNestedScrollConnection,
+        pageContent = pageContent
+    )
+}
+
+/**
+ * Isolates same-direction horizontal scrollables inside a pager page.
+ *
+ * Wrap leaf page content with this composable when the content contains `LazyRow`, horizontal
+ * `scrollable`, or another non-pager horizontal scroller. It consumes leftover horizontal fling
+ * velocity at the current pager boundary so that content flings do not bubble into an outer pager's
+ * hand-off connection.
+ *
+ * Keep this wrapper around page content, not around another [NestedHorizontalPager], so pager-to-pager
+ * hand-off remains explicit.
+ */
+@Composable
+fun NestedHorizontalPagerContent(
+    state: PagerState,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    contentAlignment: Alignment = Alignment.TopStart,
+    propagateMinConstraints: Boolean = false,
+    content: @Composable BoxScope.() -> Unit
+) {
+    val contentModifier = if (enabled) {
+        modifier.nestedScroll(
+            PagerDefaults.pageNestedScrollConnection(
+                state = state,
+                orientation = Orientation.Horizontal
+            )
+        )
+    } else {
+        modifier
+    }
+
+    Box(
+        modifier = contentModifier,
+        contentAlignment = contentAlignment,
+        propagateMinConstraints = propagateMinConstraints,
+        content = content
+    )
+}
 
 /**
  * Creates a [NestedScrollConnection] that hands horizontal drags/flings from [childState] to

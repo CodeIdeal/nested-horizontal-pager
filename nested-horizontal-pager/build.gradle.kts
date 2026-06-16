@@ -7,11 +7,7 @@ plugins {
 
 android {
     namespace = "io.github.codeideal.nestedhorizontalpager"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
@@ -40,7 +36,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.codeideal",
         artifactId = "nested-horizontal-pager",
-        version = "1.0.1"
+        version = "1.1.0"
     )
     pom {
         name.set("Nested Horizontal Pager")
