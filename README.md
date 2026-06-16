@@ -7,11 +7,12 @@ An Android Jetpack Compose sample and small library module for handling same-dir
 It fixes the common case where an inner `HorizontalPager` reaches its first or last page and the gesture should continue into the parent `HorizontalPager`, but the parent page switch feels delayed, hard to fling, or can get stuck between pages.
 
 ## Screen Recordings
-
-| Before fix | After fix |
-| --- | --- |
-| https://github.com/user-attachments/assets/595b0ea5-24e1-4284-b2b9-2fd58e32191c | https://github.com/user-attachments/assets/16c59db0-1082-4e6c-bcc2-1b7a93897d8c |
-| The parent pager can lag at the child boundary and may stop between pages. | Boundary drag and fling hand off to the parent pager more consistently. |
+### Before fix
+The parent pager can lag at the child boundary and may stop between pages.  
+https://github.com/user-attachments/assets/595b0ea5-24e1-4284-b2b9-2fd58e32191c
+### After fix
+Boundary drag and fling hand off to the parent pager more consistently.  
+https://github.com/user-attachments/assets/16c59db0-1082-4e6c-bcc2-1b7a93897d8c
 
 ## Problem
 
