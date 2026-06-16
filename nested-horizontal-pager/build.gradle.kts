@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
     id("com.vanniktech.maven.publish") version "0.36.0"
+    id("signing")
 }
 
 android {
@@ -67,4 +68,7 @@ mavenPublishing {
             developerConnection.set("scm:git:ssh://git@github.com/CodeIdeal/nested-horizontal-pager.git")
         }
     }
+}
+signing {
+    useGpgCmd()
 }
