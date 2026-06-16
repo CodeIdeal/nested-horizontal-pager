@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.demo"
+    namespace = "io.github.codeideal.nestedhorizontalpager.demo"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.demo"
+        applicationId = "io.github.codeideal.nestedhorizontalpager.demo"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -36,6 +36,12 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 }
 

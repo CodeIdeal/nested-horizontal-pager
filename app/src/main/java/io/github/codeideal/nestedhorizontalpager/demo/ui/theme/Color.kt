@@ -1,4 +1,4 @@
-package com.example.demo.ui.theme
+package io.github.codeideal.nestedhorizontalpager.demo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

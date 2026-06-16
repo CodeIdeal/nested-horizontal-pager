@@ -1,4 +1,4 @@
-package com.example.demo
+package io.github.codeideal.nestedhorizontalpager.demo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -33,9 +33,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.demo.ui.theme.DemoTheme
-import com.example.nestedhorizontalpager.NoOpNestedScrollConnection
-import com.example.nestedhorizontalpager.rememberNestedHorizontalPagerConnection
+import io.github.codeideal.nestedhorizontalpager.NoOpNestedScrollConnection
+import io.github.codeideal.nestedhorizontalpager.demo.ui.theme.DemoTheme
+import io.github.codeideal.nestedhorizontalpager.rememberNestedHorizontalPagerConnection
 import kotlinx.coroutines.launch
 
 private val demoTabs = listOf("Two levels", "Three levels")

@@ -1,4 +1,4 @@
-package com.example.nestedhorizontalpager
+package io.github.codeideal.nestedhorizontalpager
 
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package com.example.demo
+package io.github.codeideal.nestedhorizontalpager.demo
 
 import org.junit.Test
 
